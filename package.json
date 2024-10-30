@@ -1,0 +1,48 @@
+{
+  "name": "gems_desktop",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "main": "main/electron.js",
+  "build": {
+    "appId": "com.gets.gems",
+    "productName": "GEMS",
+    "files": [
+      "dist/**/*",
+      "main/**/*"
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "public/logo/ems-small-logo.png"
+    },
+    "mac": {
+      "target": "dmg",
+      "icon": "public/logo/ems-small-logo.png"
+    },
+    "linux": {
+      "target": "AppImage",
+      "icon": "public/logo/ems-small-logo.png"
+    }
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "electron:serve": "vite build && electron .",
+    "electron:build": "electron-builder"
+  },
+  "dependencies": {
+    "pinia": "^2.2.4",
+    "vue": "^3.5.12",
+    "vue-router": "^4.4.5"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.1.4",
+    "autoprefixer": "^10.4.20",
+    "electron": "^33.0.2",
+    "electron-builder": "^25.1.8",
+    "postcss": "^8.4.47",
+    "tailwindcss": "^3.4.14",
+    "vite": "^5.4.10"
+  }
+}

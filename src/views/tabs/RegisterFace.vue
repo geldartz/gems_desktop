@@ -1,80 +1,172 @@
 <template>
-    <div>
-      <input class="border border-gray-400" type="text" v-model="userName" placeholder="Enter your name" />
-      <video ref="video" autoplay @loadedmetadata="onVideoReady"></video>
-      <canvas ref="overlay"></canvas>
-      <button class="border border-blue-600 bg-blue-800" @click="registerFace" :disabled="!modelsLoaded || !videoReady">
-        Register Face
-      </button>
-      <p v-if="!modelsLoaded">Loading models, please wait...</p>
-    </div>
-  </template>
-  
-  <script setup>
-  import { ref, onMounted } from 'vue';
-  import * as faceapi from 'face-api.js';
-  
-  const video = ref(null);
-  const userName = ref('');
-  const modelsLoaded = ref(false);
-  const videoReady = ref(false);  // New state for video readiness
-  
-  async function loadModels() {
-    const MODEL_URL = 'models';
-    try {
-      await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
-      await faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL);
-      await faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL);
-      modelsLoaded.value = true;
-    } catch (error) {
-      console.error('Error loading models:', error);
-    }
-  }
-  
-  onMounted(async () => {
-    await loadModels();
-    const stream = await navigator.mediaDevices.getUserMedia({ video: {} });
-    video.value.srcObject = stream;
-  });
-  
-  const onVideoReady = () => {
-    videoReady.value = true;  // Set video readiness when metadata loads
-  };
-  
-  const registerFace = async () => {
-    if (!modelsLoaded.value || !videoReady.value) {
-      alert('Models or video are still loading. Please wait.');
-      return;
-    }
-  
-    if (!userName.value) {
-      alert('Please enter a name');
-      return;
-    }
-  
-    try {
-      const detections = await faceapi
-        .detectSingleFace(video.value, new faceapi.TinyFaceDetectorOptions())
-        .withFaceLandmarks()
-        .withFaceDescriptor();
-  
-      if (!detections) {
-        alert('No face detected. Try again.');
+  <div style="position: relative;">
+    <video ref="video" autoplay playsinline width="640" height="480"></video>
+    <canvas ref="canvas" style="position: absolute; top: 0; left: 0;"></canvas>
+    <input v-model="employeeData.name" type="text" class="py-1 px-5 border border-gray-400 text-gray-600" placeholder="Employee Name">
+    <button class="text-gray-600" @click="registerEmployee">Register Employee</button>
+    <div class="text-gray-600" v-if="registrationStatus">{{ registrationStatus }}</div>
+  </div>
+</template>
+
+<script>
+import * as faceapi from 'face-api.js';
+import axios from 'axios'; // Import Axios
+
+export default {
+  data() {
+    return {
+      video: null,
+      canvas: null,
+      registrationStatus: '',
+      headMovementPrompt:false,
+      employeeData: {
+        name: '',
+        face_encoding: [],
+        image: null,
+      },
+    };
+  },
+  async mounted() {
+    this.video = this.$refs.video;
+    this.canvas = this.$refs.canvas;
+
+    // Load face-api.js models
+    await faceapi.nets.tinyFaceDetector.loadFromUri('models');
+    await faceapi.nets.faceLandmark68Net.loadFromUri('models');
+    await faceapi.nets.faceRecognitionNet.loadFromUri('models'); // Load face recognition model
+
+    await this.startCamera();
+  },
+  methods: {
+    async startCamera() {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        this.video.srcObject = stream;
+
+        this.video.onloadedmetadata = () => {
+          this.video.play();
+          this.canvas.width = this.video.videoWidth; 
+          this.canvas.height = this.video.videoHeight; 
+          this.detectFaces();
+        };
+      } catch (error) {
+        console.error("Error accessing camera: ", error);
+      }
+    },
+    async detectFaces() {
+      const context = this.canvas.getContext('2d');
+
+      setInterval(async () => {
+        const detections = await faceapi.detectAllFaces(this.video, new faceapi.TinyFaceDetectorOptions())
+          .withFaceLandmarks()
+          .withFaceDescriptors(); // Get face descriptor for recognition
+
+        context.clearRect(0, 0, this.canvas.width, this.canvas.height); // Clear canvas
+       
+        if (detections.length > 0) {
+          const resizedDetections = faceapi.resizeResults(detections, { width: this.canvas.width, height: this.canvas.height });
+          faceapi.draw.drawFaceLandmarks(this.canvas, resizedDetections);
+
+          // Store face descriptor of the detected face for registration
+          this.employeeData.face_encoding = detections[0].descriptor;
+
+          const box = resizedDetections[0].detection.box;
+          const width = box.width;
+          const height = box.height;
+
+          const landmarks = resizedDetections[0].landmarks; // Get the landmarks of the first detection
+          const leftEye = landmarks.getLeftEye(); // Use getLeftEye() and getRightEye()
+          const rightEye = landmarks.getRightEye();
+
+          const eyeOpen = this.checkEyesOpen(leftEye, rightEye);
+          const distanceFromCamera = this.calculateDistance(width, height);
+          
+          if (distanceFromCamera < 30) {
+              if (!eyeOpen) {
+                this.registrationStatus = 'Please blink to confirm you are a live person.';
+              } else {
+                this.registrationStatus = 'You are close enough!';
+              }
+            } else {
+              this.registrationStatus = 'Please move closer to the camera.';
+            }
+
+          if (!this.headMovementPrompt) {
+            this.registrationStatus = 'Please move your head left and right.';
+            this.headMovementPrompt = true;
+          }
+        }
+      }, 500);
+    },
+    checkEyesOpen(leftEye, rightEye) {
+      const leftEyeOpen = Math.abs(leftEye[1].y - leftEye[5].y) > 10;
+      const rightEyeOpen = Math.abs(rightEye[1].y - rightEye[5].y) > 10;
+
+      return leftEyeOpen && rightEyeOpen; 
+    },
+    calculateDistance(width, height) {
+
+      const averageFaceWidthInCm = 14; 
+      const focalLength = 600; 
+
+      const distance = (averageFaceWidthInCm * focalLength) / width;
+      return distance;
+    },
+
+    async registerEmployee() {
+      const canvasElement = this.canvas;
+      const imageData = canvasElement.toDataURL('image/png');
+
+      this.employeeData.image = imageData;
+
+
+      if (!this.employeeData.name || !this.employeeData.image) {
+        this.registrationStatus = 'Please provide a name and ensure the face is detected!';
         return;
       }
-  
-      const newFaceData = { label: userName.value, descriptor: detections.descriptor };
-  
-    // const result = await window.electronAPI.saveFaceData(newFaceData);
-    // const result = await ipcRenderer.invoke('save-face-data', newFaceData);
-    const result = await window.electronAPI.saveFaceData(newFaceData);
-    
-  
-      alert(`${userName.value} registered successfully!`);
-      userName.value = '';
-    } catch (error) {
-      console.error('Error in face registration:', error);
-    }
-  };
-  </script>
-  
+
+      // Check if face is already registered
+      try {
+        const checkResponse = await axios.post('http://gems.test/api/check-face', {
+          face_encoding: this.employeeData.face_encoding
+        }, {
+          headers: { 'Content-Type': 'application/json' }
+        });
+
+        if (checkResponse.data.success === false) {
+          this.registrationStatus = 'Face already registered!';
+          this.employeeData.name = ''
+          this.employeeData.face_encoding = []
+          this.employeeData.image = null
+          return;
+        }
+
+        // Save new employee data
+        const response = await axios.post('http:gems.test/api/save-face', this.employeeData, {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (response.data.success) {
+          this.registrationStatus = 'Employee registered successfully!';
+          this.employeeData.name = ''
+          this.employeeData.face_encoding = []
+          this.employeeData.image = null
+        } else {
+          this.registrationStatus = 'Error during registration.';
+          this.employeeData.name = ''
+          this.employeeData.face_encoding = []
+          this.employeeData.image = null
+        }
+      } catch (error) {
+        console.error("Error saving employee data: ", error);
+        this.employeeData.name = ''
+          this.employeeData.face_encoding = []
+          this.employeeData.image = null
+        this.registrationStatus = 'Error registering employee.';
+      }
+    },
+  },
+};
+</script>

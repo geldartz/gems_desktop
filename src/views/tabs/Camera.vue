@@ -1,47 +1,64 @@
 <template>
-    <div>
-      <video  ref="video" autoplay></video>
-      <canvas  ref="overlay"></canvas>
-    </div>
-  </template>
-  
-  <script setup>
+  <div style="position: relative;">
+    <video ref="video" autoplay playsinline width="640" height="480"></video>
+    <canvas ref="canvas" style="position: absolute; top: 0; left: 0;"></canvas>
+  </div>
+</template>
+
+<script>
 import * as faceapi from 'face-api.js';
-import { ref, onMounted } from 'vue';
 
-const video = ref(null);
-const overlay = ref(null);
+export default {
+  data() {
+    return {
+      video: null,
+      canvas: null,
+    };
+  },
+  async mounted() {
+    this.video = this.$refs.video;
+    this.canvas = this.$refs.canvas;
 
-async function loadModels() {
-  const MODEL_URL = 'models'; // Adjust path if needed
-  await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
-  await faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL);
-  await faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL);
-}
+    // Load models
+    await faceapi.nets.tinyFaceDetector.loadFromUri('models');
+    await faceapi.nets.faceLandmark68Net.loadFromUri('models');
 
-onMounted(async () => {
-  // Load all models before starting video stream
-  await loadModels();
+    await this.startCamera();
+  },
+  methods: {
+    async startCamera() {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        this.video.srcObject = stream;
 
-  const stream = await navigator.mediaDevices.getUserMedia({ video: {} });
-  video.value.srcObject = stream;
+        this.video.onloadedmetadata = () => {
+          this.video.play();
+          this.canvas.width = this.video.videoWidth; // Set canvas size
+          this.canvas.height = this.video.videoHeight; // Set canvas size
+          this.detectFaces();
+        };
+      } catch (error) {
+        console.error("Error accessing camera: ", error);
+      }
+    },
+    async detectFaces() {
+      const context = this.canvas.getContext('2d');
 
-  video.value.addEventListener('play', async () => {
-    const displaySize = { width: video.value.width, height: video.value.height };
-    faceapi.matchDimensions(overlay.value, displaySize);
+      setInterval(async () => {
+        const detections = await faceapi.detectAllFaces(this.video, new faceapi.TinyFaceDetectorOptions())
+          .withFaceLandmarks();
 
-    setInterval(async () => {
-      const detections = await faceapi
-        .detectAllFaces(video.value, new faceapi.TinyFaceDetectorOptions())
-        .withFaceLandmarks()
-        .withFaceDescriptors();
+        console.log("Detections: ", detections); // Debugging line
+        context.clearRect(0, 0, this.canvas.width, this.canvas.height); // Clear canvas
 
-      const resizedDetections = faceapi.resizeResults(detections, displaySize);
-      overlay.value.getContext('2d').clearRect(0, 0, overlay.value.width, overlay.value.height);
-      faceapi.draw.drawDetections(overlay.value, resizedDetections);
-      faceapi.draw.drawFaceLandmarks(overlay.value, resizedDetections);
-    }, 100);
-  });
-});
-  </script>
-  
+        if (detections.length > 0) {
+          const resizedDetections = faceapi.resizeResults(detections, { width: this.canvas.width, height: this.canvas.height });
+          faceapi.draw.drawFaceLandmarks(this.canvas, resizedDetections);
+        } else {
+          console.log("No faces detected"); // Log if no faces are detected
+        }
+      }, 100);
+    },
+  },
+};
+</script>

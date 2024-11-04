@@ -24,7 +24,7 @@
         <div class="col-span-3  p-5 h-screen bg-slate-50 flex items-center justify-center">
             <LottieAnimation v-if="tab == 'none'" class="w-[600px] h-[600px]" :animation-data="FaceAnim " :auto-play="true" :loop="true" :speed="1" ref="anim" />
             <CameraView v-else-if="tab == 'clockin'"></CameraView>
-            <RegisterFace v-else></RegisterFace>
+            <Login v-else></Login>
         </div>
     </div>
 </template>
@@ -41,6 +41,7 @@ import AdminAnim from "@/assets/lottie/admin.json"
 
 import CameraView from '@/views/tabs/Camera.vue';
 import RegisterFace from '@/views/tabs/RegisterFace.vue';
+import Login from '@/views/tabs/Login.vue';
 
 const tab = ref('none')
 

@@ -2,8 +2,8 @@
     <button
       :type="type"
       :disabled="isLoading && disabled"
-      :class="[disabled ? 'bg-slate-500 hover:bg-slate-400' : 'bg-[#0346fc] hover:bg-hoverAside'], customClass"
-      class="flex w-full justify-center items-center rounded-md  px-3 py-1.5 border border-blue-200 text-sm font-semibold leading-6 shadow-sm  focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+      :class="[disabled ? 'bg-slate-500 hover:bg-slate-400' : 'bg-emsBlue hover:bg-hoverAside'], customClass"
+      class="flex w-full justify-center items-center rounded-md  px-3 py-2.5 border border-blue-200 text-md font-semibold leading-6 shadow-sm  focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
       v-bind="$attrs"
     >
     <div v-if="isLoading" class="flex items-center justify-center gap-2 ">

@@ -1,29 +1,14 @@
 <template>
-    <div class="flex flex-1 h-screen">
-      <!-- <div class="top-wave-container "></div> -->
-      <div class="video-background">
-        <iframe 
-            width="100%" 
-            height="100%" 
-            src="https://www.youtube.com/embed/juoBoc5yOZ4?autoplay=1&controls=0&showinfo=0&loop=1&mute=0" 
-            title="Chatelard Ready Home in Crosswinds Tagaytay | Luxury Homes by Brittany" 
-            frameborder="0" 
-            allow="autoplay;" 
-            allowfullscreen>
-        </iframe>
-    </div>
-    <!-- https://www.youtube.com/embed/M7LW_dF2p4w?autoplay=1&controls=0&showinfo=0&loop=1&mute=1&playlist=M7LW_dF2p4w-->
-    <!-- https://www.youtube.com/embed/juoBoc5yOZ4 -->
-   
-        <div class="absolute w-[550px] bg-[#ffffffee] h-[120%] end-0 px-[50px]" data-aos="fade-left" data-aos-delay="200" data-aos-duration="1500">    
-          <div class="mt-[180px] relative">
-            <img class="h-24 mb-5 w-auto d-block mx-auto" src="http://proptech.test/images/proptech-logo.png" alt="Proptech" />
+    <div class="flex justify-center items-center w-full h-full">
+        <div class="bg-[#ffffffee] w-[650px] p-[50px] border border-gray-300 shadow-sm rounded-md" data-aos="fade-left" data-aos-delay="200" data-aos-duration="1500">    
+          <div class="relative">
+            <h2 class="h-24 text-center font-bold text-3xl text-emsBlue" >ADMIN LOGIN</h2>
             <form @submit.prevent="handleLogin" @keydown="form.onKeydown($event)" class="space-y-6">
               <div>
                 <label for="email" class="block text-sm font-medium leading-6 text-gray-900">Email Address</label>
                 <div class="mt-2">
                   <input v-model="form.email" id="email" name="email" type="email" 
-                  class="text-sm sm:text-base relative w-full border rounded placeholder-gray-400 focus:border-indigo-400 focus:outline-none p-2" :class="[ form.errors.has('password') ? 'border-red-500': 'border-grey-500'] " />
+                  class="text-sm text-gray-600 sm:text-base relative w-full border rounded placeholder-gray-400 focus:border-indigo-400 focus:outline-none p-2" :class="[ form.errors.has('password') ? 'border-red-500': 'border-grey-500'] " />
                   <span class="flex items-center font-medium tracking-wide text-red-500 text-xs mt-1 ml-1" v-if="form.errors.has('email')">{{ form.errors.get('email') }}</span>
                 </div>
               </div>
@@ -32,70 +17,38 @@
                 <label for="password" class="block text-sm font-medium leading-6 text-gray-900">Password</label>
                 <div class="mt-2">
                   <input  v-model="form.password" id="password" name="password" type="password" 
-                  class="text-sm sm:text-base relative w-full border rounded placeholder-gray-400 focus:border-indigo-400 focus:outline-none p-2" :class="[ form.errors.has('password') ? 'border-red-500': 'border-grey-500'] " />
+                  class="text-sm text-gray-600 sm:text-base relative w-full border rounded placeholder-gray-400 focus:border-indigo-400 focus:outline-none p-2" :class="[ form.errors.has('password') ? 'border-red-500': 'border-grey-500'] " />
                   <span class="flex items-center font-medium tracking-wide text-red-500 text-xs mt-1 ml-1" v-if="form.errors.has('password')">{{ form.errors.get('password') }}</span>
                 </div>
               </div>
-
+              <p class="my-2 text-gray-500 text-sm">By logging-in you agree to our <RouterLink class="text-emsBlue" to="/privacy-policy">Privacy Policy</RouterLink>  and <RouterLink class="text-emsBlue" to="/terms-and-condition">Terms of Use</RouterLink></p>
+              <SolidButton :isLoading="form.busy" label="Login" :icon="LockClosedIcon"></SolidButton>
               <div class="flex items-center justify-between">
                 <div class="flex items-center">
-                  <input id="remember-me" name="remember-me" type="checkbox" class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-600" />
+                  <input id="remember-me" name="remember-me" type="checkbox" class="h-4 w-4 rounded border-gray-300 text-emsBlue focus:ring-blue-600" />
                   <label for="remember-me" class="ml-3 block text-sm leading-6 text-gray-700">Remember me</label>
                 </div>
-
                 <div class="text-sm leading-6">
-                  <a href="#" class="font-semibold text-blue-600 hover:text-blue-500">Forgot password?</a>
+                  <a href="#" class="font-semibold text-emsBlue hover:text-blue-500">Forgot password?</a>
                 </div>
-              </div>
-
-              <div>
-                <SolidButton :isLoading="form.busy" label="Login" :icon="LockClosedIcon"></SolidButton>
-                <!-- <button type="submit" :disabled="form.busy" class="flex w-full justify-center rounded-md bg-[#0346fc] px-3 py-2 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-blue-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600">Login</button> -->
               </div>
             </form>
            
           </div>
 
-          <div class="mt-10">
-            <div class="relative">
-              <div class="absolute inset-0 flex items-center" aria-hidden="true">
-                <div class="w-full border-t border-blue-400" />
-              </div>
-              <div class="relative flex justify-center text-sm font-medium leading-6">
-                <span class="bg-white rounded-md shadow-sm px-6 text-gray-800">By logging in, you agree to our</span>
-              </div>
-            </div>
-
-            <div class="mt-6 grid grid-cols-2 gap-2">
-              
-              <a href="#" class="flex w-full items-center justify-center gap-3 rounded-md border-blue-600 border px-3 py-1.5 text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#24292F]">
-                <span class="text-sm font-semibold leading-6 text-[#0346fc]">Privacy Policy</span>
-              </a>
-
-              <a href="#" class="flex w-full items-center justify-center gap-3 rounded-md border-blue-600 border px-3 py-1.5 text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#24292F]">
-                
-                <span class="text-sm font-semibold leading-6 text-[#0346fc]">Terms & Condition</span>
-              </a>
-            </div>
-          </div>
         
         </div>
-        <div class="wave-container"></div>
+        <!-- <div class="wave-container"></div> -->
   
-      <!-- <div class="flex flex-1 flex-col justify-center px-4 py-12 sm:px-6 lg:flex-none lg:px-20 xl:px-24">
-        
-      </div> -->
-    
-
-
     </div>
   </template>
 
   <script setup>
   import { reactive, ref } from 'vue';
   import Form from 'vform'
+
 //   import {siteSettings} from '@/store/utils';
-//   import {userAuthStore} from '@/store/auth';
+  import {userAuthStore} from '@/stores/auth';
 //   import { successMessage, errorMessage } from "@/utilities/toast.js";
   import SolidButton from '@/components/buttons/SolidButton.vue';
   import { LockClosedIcon } from '@heroicons/vue/24/outline';
@@ -109,13 +62,13 @@
 
 
     function handleLogin(){
-      axios.get('/sanctum/csrf-cookie').then(response => {
-        form.post("/api/login").then((data) => {
-
+      axios.get(import.meta.env.VITE_API_URL+'/sanctum/csrf-cookie').then(response => {
+        form.post(import.meta.env.VITE_API_URL+"/login").then((data) => {
+          console.log(data)
             if(data.data.success){
-            //   userAuthStore().authenticated = true
-            //   userAuthStore().user = data.data.data
-            //   userAuthStore().redirect();
+              userAuthStore().authenticated = true
+              userAuthStore().user = data.data.data
+              userAuthStore().redirect();
             }else{
               
             }

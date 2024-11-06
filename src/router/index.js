@@ -8,6 +8,8 @@ const PrivacyPolicy = () => import("@/views/pages/Policy.vue");
 const TermsCondition = () => import("@/views/pages/Terms.vue");
 
 const Dashboard = () => import("@/views/Dashboard.vue");
+const ClockIn = () => import("@/views/ClockIn.vue");
+const ClockOut = () => import("@/views/ClockOut.vue");
 
 const router = createRouter({
   history: createWebHashHistory(import.meta.env.BASE_URL),
@@ -58,6 +60,22 @@ const router = createRouter({
       component: Dashboard,
       meta: {
           middleware: "auth",
+      },
+    },
+    {
+      path: '/clock-in',
+      name: 'clockin',
+      component: ClockIn,
+      meta: {
+          middleware: "guest",
+      },
+    },
+    {
+      path: '/clock-out',
+      name: 'clockout',
+      component: ClockOut,
+      meta: {
+          middleware: "guest",
       },
     },
   ]

@@ -22,12 +22,14 @@
   import RegisterFace from '@/views/tabs/RegisterFace.vue';
   import ManualPage from '@/views/tabs/Manual.vue';
   import Logs from '@/views/tabs/Logs.vue';
+  import Settings from '@/views/tabs/Settings.vue';
 
   const activeTab = ref(0);
   const tabs = ref([
     { name: 'Face Registration', component: RegisterFace },
     { name: 'Manual Clock In/Clock Out', component: ManualPage },
     { name: 'Logs', component: Logs },
+    { name: 'Settings', component: Settings },
     ]);
   </script>
   

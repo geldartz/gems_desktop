@@ -1,7 +1,7 @@
 <template>
   <div class="h-screen relative grid grid-cols-2 gap-5">
     <div>
-      <v-select class="text-md v-select-style" :options="employees" @option:selected="filterEmployee"  label="label" placeholder="Select employee"></v-select>
+      <v-select v-model="selectEmp" class="text-md v-select-style" :options="employees" @option:selected="filterEmployee"  label="label" placeholder="Select employee"></v-select>
       <hr class="border border-gray-300 my-5">
       <div>
           <div class="relative my-5">
@@ -41,7 +41,8 @@
       <div class="relative" v-show="!initializing">
         <video ref="video" autoplay playsinline width="640" height="480" class="border-double border-4 rounded-lg border-emsBlue"></video>
         <canvas ref="canvas" style="position: absolute; top: 0; left: 0;"></canvas>
-        <p class="text-emsBlue text-lg font-bold text-center my-5" v-if="registrationStatus">{{ registrationStatus }}</p>
+        <p class="text-emsBlue text-lg font-bold text-center my-5" >{{ registrationStatus }}</p>
+        
       </div>
       
     </div>
@@ -57,7 +58,7 @@
 <script setup>
 import { LottieAnimation } from "lottie-web-vue";
 import Camera from "@/assets/lottie/camera.json";
-
+import { successMessage, errorMessage } from "@/utils/toast.js";
 </script>
 
 <script>
@@ -65,14 +66,16 @@ import * as faceapi from 'face-api.js';
 import axios from 'axios';
 
 
+
 export default {
   data() {
     return {
       initializing: true,
+      allGood: false,
+      selectEmp: '',
       video: null,
       canvas: null,
       employees: [],
-      employee_id: '',
       name: '',
       birthday: '',
       company:'',
@@ -83,7 +86,7 @@ export default {
       registrationStatus: '',
       headMovementPrompt:false,
       employeeData: {
-        name: '',
+        employee_id:'',
         face_encoding: [],
         image: null,
       },
@@ -103,23 +106,25 @@ export default {
   },
   methods: {
    async filterEmployee(data){
-        this.employee_id = data.value
+
+        this.employeeData.employee_id = data.value
         this.initializing = false
-        axios.get(import.meta.env.VITE_API_URL+'/get-employee-info?employee_id='+this.employee_id).then(async (response) => {
-          console.log(response.data.data)
+
+        axios.get(import.meta.env.VITE_API_URL+'/get-employee-info?employee_id='+data.value).then(async (response) => {
+
           this.name = response.data.data.name
           this.birthday = response.data.data.birthday 
           this.company = response.data.data.company
           this.date_hired = response.data.data.date_hired
           this.position = response.data.data.position
           this.report_at = response.data.data.report_at
+          this.schedule = response.data.data.schedule
           await this.startCamera();
         })
     },
     async fetchEmployees(){
       axios.get(import.meta.env.VITE_API_URL+'/get-face-recognation-employees').then((response) =>{
         this.employees = response.data.data
-        console.log(response.data.data)
       })
     },
     async startCamera() {
@@ -165,11 +170,12 @@ export default {
           const eyeOpen = this.checkEyesOpen(leftEye, rightEye);
           const distanceFromCamera = this.calculateDistance(width, height);
           
-          if (distanceFromCamera < 30) {
+          if (distanceFromCamera < 40) {
               if (!eyeOpen) {
                 this.registrationStatus = 'Please blink to confirm you are a live person.';
               } else {
-                this.registrationStatus = 'All set. Please hold on while I save the data...';
+                this.allGood = true
+                this.submitFace();
               }
             } else {
               this.registrationStatus = 'Please move closer to the camera.';
@@ -195,6 +201,102 @@ export default {
 
       const distance = (averageFaceWidthInCm * focalLength) / width;
       return distance;
+    },
+
+    async submitFace(){
+  
+      const canvasElement = this.canvas;
+      const imageData = canvasElement.toDataURL('image/png');
+      this.employeeData.image = imageData;
+      console.log(this.employeeData)
+      if (!this.employeeData.employee_id || !this.employeeData.image) {
+        
+        errorMessage("Oops!", "Please select employee and ensure the face is detected!", "bottom-right");
+        return;
+      }
+
+      try {
+        const checkResponse = await axios.post(import.meta.env.VITE_API_URL+'/check-face', {
+          face_encoding: this.employeeData.face_encoding,
+          employee_id: this.employeeData.employee_id
+        }, {
+          headers: { 'Content-Type': 'application/json' }
+        });
+        console.log(checkResponse.data.message)
+        if (checkResponse.data.success === false) {
+          errorMessage("Oops!", "Face already registered!", "bottom-right");
+          this.employeeData.employee_id = ''
+          this.name = ''
+          this.birthday = ''
+          this.company = ''
+          this.date_hired = ''
+          this.position = ''
+          this.report_at = ''
+          this.schedule = ''
+          this.selectEmp = ''
+          this.initializing = true
+          this.employeeData.face_encoding = []
+          this.employeeData.image = null
+          return;
+        }
+
+        // Save new employee data
+        const response = await axios.post(import.meta.env.VITE_API_URL+'/save-face', this.employeeData, {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (response.data.success) {
+          this.initializing = true
+          this.selectEmp = ''
+          successMessage("Yay!", "Employee registered successfully!", "bottom-right");
+
+          this.employeeData.employee_id = ''
+          this.name = ''
+          this.birthday = ''
+          this.company = ''
+          this.date_hired = ''
+          this.position = ''
+          this.report_at = ''
+          this.schedule = ''
+
+          this.employeeData.employee_id = ''
+          this.employeeData.face_encoding = []
+          this.employeeData.image = null
+        } else {
+          errorMessage("Oops!", "Error during registration.", "bottom-right");
+          this.selectEmp = ''
+          this.initializing = true
+          this.employeeData.employee_id = ''
+          this.name = ''
+          this.birthday = ''
+          this.company = ''
+          this.date_hired = ''
+          this.position = ''
+          this.report_at = ''
+          this.schedule = ''
+
+          this.employeeData.face_encoding = []
+          this.employeeData.image = null
+        }
+      } catch (error) {
+          errorMessage("Oops!", "Error during registration.", "bottom-right");
+          this.selectEmp = ''
+          this.initializing = true
+          this.employeeData.employee_id = ''
+          this.name = ''
+          this.birthday = ''
+          this.company = ''
+          this.date_hired = ''
+          this.position = ''
+          this.report_at = ''
+          this.schedule = ''
+          this.employeeData.face_encoding = []
+          this.employeeData.image = null
+      }
+
+
     },
 
     async registerEmployee() {

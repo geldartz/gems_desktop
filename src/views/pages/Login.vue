@@ -52,6 +52,7 @@
 //   import { successMessage, errorMessage } from "@/utilities/toast.js";
   import SolidButton from '@/components/buttons/SolidButton.vue';
   import { LockClosedIcon } from '@heroicons/vue/24/outline';
+  import { successMessage, errorMessage } from "@/utils/toast.js";
 
     const form = reactive(new Form({
         email: '',
@@ -70,11 +71,11 @@
               userAuthStore().user = data.data.data
               userAuthStore().redirect();
             }else{
-              
+              errorMessage("Oops!", "These credentials do not match our records.", "top-right");
             }
           })
           .catch(({ response }) => {
-            // errorMessage("Oops!", "These credentials do not match our records.", "top-right");
+            errorMessage("Oops!", "These credentials do not match our records.", "top-right");
           })
           .finally(() => {
           });

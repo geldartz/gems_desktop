@@ -19,17 +19,17 @@ export default {
           </div>
           <hr class="my-4 border border-gray-300">
           <div class="flex flex-col items-center justify-center w-[80%] mx-auto h-[800px]">
-              <div @click="setTab('clockin')" class="flex-initial w-full flex items-center justify-between border border-gray-400 rounded-md shadow-md bg-green-600 hover:bg-green-400 p-4 mb-5 cursor-pointer">
+              <router-link to="/clock-in" class="flex-initial w-full flex items-center justify-between border border-gray-400 rounded-md shadow-md bg-green-600 hover:bg-green-400 p-4 mb-5 cursor-pointer">
                       <LottieAnimation  class="rounded-lg bg-white flex-initial w-20 h-20 mr-10" :animation-data="ClockInAnim" :auto-play="true" :loop="true" :speed="1" ref="anim" />
                       <h3 class="flex-1 text-white font-bold text-2xl">CLOCK IN</h3>
-              </div>
-              <div @click="setTab('clockout')" class="flex-initial w-full flex items-center justify-between border border-gray-400 rounded-md shadow-md bg-red-600 hover:bg-red-400 p-4 mb-5 cursor-pointer">
+              </router-link>
+              <router-link to="/clock-out" class="flex-initial w-full flex items-center justify-between border border-gray-400 rounded-md shadow-md bg-red-600 hover:bg-red-400 p-4 mb-5 cursor-pointer">
                       <LottieAnimation  class="rounded-lg bg-white flex-initial w-20 h-20 mr-10" :animation-data="ClockOutAnim" :auto-play="true" :loop="true" :speed="1" ref="anim" />
                       <h3 class="flex-1 text-white font-bold text-2xl">CLOCK OUT</h3>
-              </div>
-              <router-link to="/login" class="flex-initial w-full flex items-center justify-between border border-gray-400 rounded-md shadow-md bg-blue-600 hover:bg-blue-400 p-4 mb-5 cursor-pointer">
+              </router-link>
+              <router-link :to="userAuthStore().authenticated ? '/dashboard'  : '/login'" class="flex-initial w-full flex items-center justify-between border border-gray-400 rounded-md shadow-md bg-blue-600 hover:bg-blue-400 p-4 mb-5 cursor-pointer">
                       <LottieAnimation  class="rounded-lg bg-white flex-initial w-20 h-20 mr-10" :animation-data="AdminAnim" :auto-play="true" :loop="true" :speed="1" ref="anim" />
-                      <h3 class="flex-1 text-white font-bold text-2xl">ADMIN LOGIN</h3>
+                      <h3 class="flex-1 text-white font-bold text-2xl">{{ userAuthStore().authenticated ? 'DASHBOARD' : 'ADMIN LOGIN' }} </h3>
               </router-link>
           </div>
       </div>
@@ -37,10 +37,6 @@ export default {
           <router-view>
             
           </router-view>
-          <!-- <LottieAnimation v-if="tab == 'none'" class="w-[600px] h-[600px]" :animation-data="FaceAnim " :auto-play="true" :loop="true" :speed="1" ref="anim" />
-          <CameraView v-else-if="tab == 'clockin'"></CameraView>
-          <RegisterFace v-else-if="tab == 'clockout'"></RegisterFace>
-          <Login v-else-if="tab == 'login'"></Login> -->
       </div>
   </div>
 </template>
@@ -48,23 +44,12 @@ export default {
 
 <script setup>
 import { onMounted, reactive, ref, watch, computed, provide, inject, onUpdated, nextTick   } from "vue";
-
+import {userAuthStore} from '@/stores/auth';
 import { LottieAnimation } from "lottie-web-vue";
-import FaceAnim from "@/assets/lottie/face.json"
+
 import ClockInAnim from "@/assets/lottie/clockin.json"
 import ClockOutAnim from "@/assets/lottie/clockout.json"
 import AdminAnim from "@/assets/lottie/admin.json"
-
-import CameraView from '@/views/tabs/Camera.vue';
-import RegisterFace from '@/views/tabs/RegisterFace.vue';
-import Login from '@/views/pages/Login.vue';
-
-const tab = ref('none')
-
-function setTab(name){
-  tab.value = name;
-}
-
 
 
 

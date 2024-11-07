@@ -1,10 +1,11 @@
 <template>
-    <div class="flex justify-center items-center mt-10">
+    <div class="flex flex-col justify-center items-center mt-10">
+      <h3 class="text-emsBlue text-3xl font-bold text-center my-2">CLOCK IN</h3>
         <div class="relative">
-            <video ref="video" autoplay playsinline width="854" height="480" class="border-double border-4 rounded-lg border-emsBlue"></video>
+            <video ref="video" autoplay playsinline width="854" height="480" class="border-double border-4 rounded-lg border-emsBlue "></video>
             <canvas ref="canvas" style="position: absolute; top: 0; left: 0;"></canvas>
             <p  class="text-emsBlue text-lg font-bold text-center my-5" v-if="initializing">{{ registrationStatus }}</p>
-            <p v-if="!initializing" class="text-emsBlue text-lg font-bold text-center my-5">Hi {{ employee_name }}!</p>
+            <p v-if="!initializing" class="text-emsBlue text-lg font-bold text-center my-5">{{ prompt_text }}</p>
         </div>
     </div>
 </template>
@@ -22,12 +23,14 @@ export default {
     data() {
     return {
       initializing: true,
-      employee_name:'',
+      prompt_text:'',
       video: null,
       canvas: null,
       name: '',
       registrationStatus: '',
       headMovementPrompt:false,
+      employee_id: '',
+      schedule_id: '',
       face_encoding: [],
       submitted: false,
     };
@@ -36,10 +39,9 @@ export default {
     this.video = this.$refs.video;
     this.canvas = this.$refs.canvas;
 
-    // Load face-api.js models
     await faceapi.nets.tinyFaceDetector.loadFromUri('models');
     await faceapi.nets.faceLandmark68Net.loadFromUri('models');
-    await faceapi.nets.faceRecognitionNet.loadFromUri('models'); // Load face recognition model
+    await faceapi.nets.faceRecognitionNet.loadFromUri('models'); 
     await this.startCamera();
   },
   methods: {
@@ -60,29 +62,36 @@ export default {
         errorMessage("Oops!", "Error accessing camera.", "bottom-right");
       }
     },
+    stopCamera() {
+      const stream = this.video.srcObject;
+      if (stream) {
+        const tracks = stream.getTracks();
+        tracks.forEach(track => track.stop());
+        this.video.srcObject = null;
+      }
+    },
     async detectFaces() {
       const context = this.canvas.getContext('2d');
 
       setInterval(async () => {
         const detections = await faceapi.detectAllFaces(this.video, new faceapi.TinyFaceDetectorOptions())
           .withFaceLandmarks()
-          .withFaceDescriptors(); // Get face descriptor for recognition
+          .withFaceDescriptors(); 
 
-        context.clearRect(0, 0, this.canvas.width, this.canvas.height); // Clear canvas
+        context.clearRect(0, 0, this.canvas.width, this.canvas.height); 
        
         if (detections.length > 0) {
           const resizedDetections = faceapi.resizeResults(detections, { width: this.canvas.width, height: this.canvas.height });
           faceapi.draw.drawFaceLandmarks(this.canvas, resizedDetections);
 
-          // Store face descriptor of the detected face for registration
           this.face_encoding = detections[0].descriptor;
 
           const box = resizedDetections[0].detection.box;
           const width = box.width;
           const height = box.height;
 
-          const landmarks = resizedDetections[0].landmarks; // Get the landmarks of the first detection
-          const leftEye = landmarks.getLeftEye(); // Use getLeftEye() and getRightEye()
+          const landmarks = resizedDetections[0].landmarks; 
+          const leftEye = landmarks.getLeftEye(); 
           const rightEye = landmarks.getRightEye();
 
           const eyeOpen = this.checkEyesOpen(leftEye, rightEye);
@@ -129,12 +138,49 @@ export default {
           headers: { 'Content-Type': 'application/json' }
         }).then((response) => {
             this.initializing = false
-            console.log(response.data.data)
-            this.employee_name = response.data.data.first_name +' '+ response.data.data.last_name
-        });
+            if(response.data.data.name == undefined){
+              this.prompt_text = "Your face is not recognized in our system. Please reach out to HR to complete your registration."
+              this.stopCamera();
+              setTimeout(() => {
+                
+                this.$router.push('/')
+              }, 3000);
+              
+            }else{
 
-        
-    }
+              this.prompt_text = "Hi "+ response.data.data.name +"!\n Please hold on while I submit your daily clock-in."
+              this.employee_id = response.data.data.id
+              this.schedule_id = response.data.data.schedule_id
+              setTimeout(() => {
+                this.processClockIn();
+              }, 2000);
+            }
+            
+        });
+    },
+    async processClockIn(){
+      await axios.post(import.meta.env.VITE_API_URL+'/process-clock-in', {
+        employee_id: this.employee_id,
+        schedule_id: this.schedule_id,
+      }).then((reponse) => {
+        console.log(reponse.data.data)
+         this.prompt_text = "You successfully clocked in at "+this.getCurrentTime()+".";
+         this.stopCamera();
+        setTimeout(() => {
+          this.$router.push('/')
+          }, 3000);
+      })
+    },
+     getCurrentTime() {
+      const now = new Date();
+      let hours = now.getHours();
+      const minutes = now.getMinutes().toString().padStart(2, '0');
+      const amPm = hours >= 12 ? 'PM' : 'AM';
+
+      hours = hours % 12 || 12; 
+
+      return `${hours}:${minutes} ${amPm}`;
+    },
   }
 }
 

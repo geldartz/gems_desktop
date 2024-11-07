@@ -72,6 +72,7 @@ export default {
     return {
       initializing: true,
       allGood: false,
+      isSubmitted: false,
       selectEmp: '',
       video: null,
       canvas: null,
@@ -111,7 +112,7 @@ export default {
         this.initializing = false
 
         axios.get(import.meta.env.VITE_API_URL+'/get-employee-info?employee_id='+data.value).then(async (response) => {
-
+          this.isSubmitted = false;
           this.name = response.data.data.name
           this.birthday = response.data.data.birthday 
           this.company = response.data.data.company
@@ -142,6 +143,14 @@ export default {
         console.error("Error accessing camera: ", error);
       }
     },
+    stopCamera() {
+      const stream = this.video.srcObject;
+      if (stream) {
+        const tracks = stream.getTracks();
+        tracks.forEach(track => track.stop());
+        this.video.srcObject = null;
+      }
+    },
     async detectFaces() {
       const context = this.canvas.getContext('2d');
 
@@ -170,12 +179,13 @@ export default {
           const eyeOpen = this.checkEyesOpen(leftEye, rightEye);
           const distanceFromCamera = this.calculateDistance(width, height);
           
-          if (distanceFromCamera < 40) {
+          if (distanceFromCamera < 40 && !this.isSubmitted) {
               if (!eyeOpen) {
                 this.registrationStatus = 'Please blink to confirm you are a live person.';
               } else {
                 this.allGood = true
                 this.submitFace();
+                this.isSubmitted = true;
               }
             } else {
               this.registrationStatus = 'Please move closer to the camera.';
@@ -237,6 +247,7 @@ export default {
           this.initializing = true
           this.employeeData.face_encoding = []
           this.employeeData.image = null
+          this.stopCamera();
           return;
         }
 
@@ -264,6 +275,7 @@ export default {
           this.employeeData.employee_id = ''
           this.employeeData.face_encoding = []
           this.employeeData.image = null
+          this.stopCamera();
         } else {
           errorMessage("Oops!", "Error during registration.", "bottom-right");
           this.selectEmp = ''
@@ -279,6 +291,7 @@ export default {
 
           this.employeeData.face_encoding = []
           this.employeeData.image = null
+          this.stopCamera();
         }
       } catch (error) {
           errorMessage("Oops!", "Error during registration.", "bottom-right");
@@ -294,6 +307,7 @@ export default {
           this.schedule = ''
           this.employeeData.face_encoding = []
           this.employeeData.image = null
+          this.stopCamera();
       }
 
 

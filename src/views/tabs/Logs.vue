@@ -1,10 +1,21 @@
 <template>
-    <div class="block mx-auto h-screen">
-        <h3 class="text-emsBlue text-2xl">Logs Page</h3>
-    </div>
-    
+      <div class="block mx-auto h-screen">
+        <CustomTable  :url="'/'" :headers="detailedTableHeaders"></CustomTable>
+      </div>
+  </template>
+  
+  <script setup>
+  import { onMounted, reactive, ref, watch, computed, provide, inject, onUpdated, nextTick   } from "vue";
+  import CustomTable from "@/components/table/Table.vue";
 
-</template>
-
-<script setup>
-</script>
+  const detailedTableHeaders = reactive([
+      { title: 'Employee Code', onSet: true, sortable: true, query: 'employee_id', date_filtered: false, searchable: true, checked: true, hasInlineEdit: false, textAlign: 'left', hide:true },
+      { title: 'Employee Number', onSet: true, sortable: true, query: 'employee_number', date_filtered: false, searchable: true, checked: true, hasInlineEdit: false, textAlign: 'left'},
+      { title: 'Employee Name', onSet: true, sortable: true, query: 'employee_name', date_filtered: false, searchable: true, checked: true, hasInlineEdit: false, textAlign: 'left', freeze: true },
+      { title: 'Clock In', onSet: true, sortable: true, query: 'employee_name', date_filtered: false, searchable: true, checked: true, hasInlineEdit: false, textAlign: 'left', freeze: true },
+      { title: 'Clock Out', onSet: true, sortable: true, query: 'employee_name', date_filtered: false, searchable: true, checked: true, hasInlineEdit: false, textAlign: 'left', freeze: true },
+  ]);
+  
+  
+  
+  </script>

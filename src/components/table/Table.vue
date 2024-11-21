@@ -15,22 +15,22 @@
         
             </div>
         </div>
-        <div class="mt-1 flow-root dark:bg-darkmode-700">
+        <div class="mt-1 flow-root bg-white ">
             <div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
                 <div class="w-full py-2 align-middle sm:px-6 lg:px-8">
-                    <div class="border border-emsGray dark:border-gray-600 rounded-lg overflow-hidden">
+                    <div class="border border-emsGray  rounded-lg overflow-hidden">
                         <div class="w-full max-h-[700px] overflow-auto">
                             <table class="w-full table-fixed overflow-auto">
-                                <thead class="bg-emsBlue dark:bg-darkmode-600 text-white  sticky top-0 z-10">
+                                <thead class="bg-emsBlue  text-white  sticky top-0 z-10">
                                     <tr>
                                         <th v-show="showSelect" scope="col" class="py-2.5 pl-2 text-sm w-10">
-                                            <input type="checkbox" class="parentCheckbox focus:ring-0 rounded-sm dark:bg-darkmode-700 dark:border-gray-500"
+                                            <input type="checkbox" class="parentCheckbox focus:ring-0 rounded-sm"
                                                 @change="checkAll($event)" />
                                         </th>
                                         <th v-for="(th, index) in filteredHeader" :key="th" 
                                             v-show="th.title != 'APPROVERS' && !th.hide"
                                             
-                                            :class="[th.freeze ? 'dark:bg-darkmode-600 bg-emsBlue ':'' ,'py-2.5  text-sm dark:text-darkmode-555  font-normal ',isAttendanceReport ? '' : 'whitespace-nowrap uppercase', th.title == 'ACTIONS' || th.title == 'ID' ? 'w-32' : (th.title == 'ATTACHMENTS' ? 'w-64' : 'w-44 min-w-44')]"
+                                            :class="[th.freeze ? ' bg-emsBlue ':'' ,'py-2.5  text-sm   font-normal ',isAttendanceReport ? '' : 'whitespace-nowrap uppercase', th.title == 'ACTIONS' || th.title == 'ID' ? 'w-32' : (th.title == 'ATTACHMENTS' ? 'w-64' : 'w-44 min-w-44')]"
                                             :style="th.freeze ? { left: getLeftPosition(index) + 'px', position: 'sticky', zIndex: 10,  } : {}" :ref="'header-' + index">
                                             <div 
                                                 :class="['flex items-center px-2 gap-2', { 'justify-center': th.title == 'ACTIONS' }, { 'ml-5': index == 0 }]">
@@ -51,16 +51,16 @@
                                         :colLength="showSelect ? filteredHeader.length + 1 : filteredHeader.length" />
 
                                     <tr v-if="!isLoading && from_count > 0"
-                                        :class="[hasRowClick ? 'hover:cursor-pointer hover:bg-slate-100' : '', 'border-b border-lightgray dark:border-gray-600 dark:hover:bg-slate-700']"
+                                        :class="[hasRowClick ? 'hover:cursor-pointer hover:bg-slate-100' : '', 'border-b border-lightgray ']"
                                         v-for="item in formattedData" :key="item.id" :id="'col-' + item.id"
                                         @click="hasRowClick ? tableRowClick(item) : ''">
                                         <td v-if="(item.hasOwnProperty('id') && showSelect == true) || item.hasOwnProperty('employee_id')"
                                             class="pl-2 text-center">
                                             <input @change="checkItem($event)" type="checkbox" :value="item.id"
-                                                :checked="item.checked" class="checkTrigger focus:ring-0 rounded-sm dark:bg-darkmode-700 dark:border-gray-500">
+                                                :checked="item.checked" class="checkTrigger focus:ring-0 rounded-sm ">
                                         </td>
                                         <td v-for="(column, index) in filteredHeader" :key="column.title"  v-show="!column.hide"
-                                            :class="['text-gray-600 text-' + column.textAlign, { 'highlight': index == 0 }, 'my-2 py-4 px-2', { 'pl-8': index == 0 }, column.freeze ? 'dark:bg-darkmode-700 bg-white':'']"
+                                            :class="['text-gray-600 text-' + column.textAlign, { 'highlight': index == 0 }, 'my-2 py-4 px-2', { 'pl-8': index == 0 }, column.freeze ? ' bg-white':'']"
                                             :style="column.freeze ? { left: getLeftPosition(index) + 'px', position: 'sticky' } : {}">
                                             <template v-if="column.hasInlineEdit">
                                                 <slot :name="column.query" :data="item"></slot>
@@ -73,7 +73,7 @@
                                             <template v-else >
 
                                                 <span v-if="!column.hasInlineEdit"
-                                                    class="dark:text-darkmode-444 text-[12px]">
+                                                    class=" text-[12px]">
                                                     {{ item[column.query] }}
                                                 </span>
 
@@ -86,7 +86,7 @@
                                         <div class="full">
                                             <LottieAnimation  class="w-96 h-96 block mx-auto" :animation-data="NoDataLottie" :auto-play="true" :loop="true" :speed="1" ref="anim" />
                                            
-                                            <p class="text-center pb-5 dark:text-darkmode-555">No records found</p>
+                                            <p class="text-center pb-5 ">No records found</p>
                                         </div>
                                     </td>
 
@@ -95,13 +95,13 @@
                         </div>
                     </div>
                     <div v-show="showPaginate"
-                        class="flex flex-col sm:flex-row items-center bg-white dark:bg-darkmode-700 px-4 py-3 sm:px-6 ">
+                        class="flex flex-col sm:flex-row items-center bg-white  px-4 py-3 sm:px-6 ">
                         <div class="flex-initial w-full md:1/3 " v-if="hasShowEntries">
                             <div
-                                class="flex items-center justify-center md:justify-start text-[11px] text-gray-700 dark:text-darkmode-555">
+                                class="flex items-center justify-center md:justify-start text-[11px] text-gray-700 ">
                                 <span>SHOW</span>
                                 <select @change="showEntries($event)" name="number-entries"
-                                    class="block w-24 dark:bg-darkmode-600 dark:ring-slate-700 dark:text-darkmode-444 rounded-sm border-0 mx-1 py-1 pl-3 pr-10 text-gray-700 ring-1 ring-inset ring-gray-300 bg-white focus:ring-1 focus:ring-gray-600 text-[11px]">
+                                    class="block w-24   rounded-sm border-0 mx-1 py-1 pl-3 pr-10 text-gray-700 ring-1 ring-inset ring-gray-300 bg-white focus:ring-1 focus:ring-gray-600 text-[11px]">
                                     <option value="10">10</option>
                                     <option value="25">25</option>
                                     <option value="50">50</option>
@@ -115,7 +115,7 @@
                             </div>
                         </div>
                         <div class="flex-initial w-full md:1/3 items-center text-center justify-between py-2 md:py-0 ">
-                            <p class=" text-gray-700 dark:text-darkmode-555 text-[11px]"> SHOWING <span class="">{{
+                            <p class=" text-gray-700  text-[11px]"> SHOWING <span class="">{{
                                 from_count }}</span>
                                 TO <span class="">{{ to_count }}</span> OF <span class="">{{ total_query_count }}</span>
                                 RESULTS </p>
@@ -126,14 +126,14 @@
                                     <li class="page-item relative inline-flex items-center rounded-l-md "
                                         :class="[currentPage === 1 ? 'text-gray-400' : 'text-gray-700']">
                                         <button
-                                            class="px-2 py-2  ring-1 ring-inset ring-gray-300 dark:ring-slate-700 rounded-l-md hover:bg-gray-50 focus:z-20 focus:outline-offset-0"
+                                            class="px-2 py-2  ring-1 ring-inset ring-gray-300  rounded-l-md hover:bg-gray-50 focus:z-20 focus:outline-offset-0"
                                             tabindex="-1" @click.prevent="firstEntries()"
                                             :disabled="currentPage === 1">First</button>
                                     </li>
                                     <li class=" relative inline-flex items-center"
                                         :class="[currentPage === 1 ? 'text-gray-400' : 'text-gray-700']">
                                         <button
-                                            class="px-4 py-2  text-[11px] ring-1 ring-inset ring-gray-300 dark:ring-slate-700 hover:bg-gray-50 focus:z-20 focus:outline-offset-0"
+                                            class="px-4 py-2  text-[11px] ring-1 ring-inset ring-gray-300  hover:bg-gray-50 focus:z-20 focus:outline-offset-0"
                                             tabindex="-1" @click.prevent="prevEntries()"
                                             :disabled="currentPage === 1">Prev</button>
                                     </li>
@@ -141,18 +141,18 @@
                                         class="relative z-10 inline-flex items-center ">
                                         <button
                                             class="text-[11px]  px-4 py-2  font-semibold  focus:z-20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
-                                            :class="[page === currentPage ? 'bg-blue-400 dark:bg-darkmode-500 text-white border-1 border-blue-600' : 'text-blue ring-1 ring-inset ring-gray-300']"
+                                            :class="[page === currentPage ? 'bg-blue-400  text-white border-1 border-blue-600' : 'text-blue ring-1 ring-inset ring-gray-300']"
                                             @click.prevent="paginateEvent(page)">{{ page }}</button>
                                     </li>
                                     <li class="page-item relative inline-flex items-center ">
                                         <button
-                                            class="px-4 py-2  text-[11px] ring-1 ring-inset ring-gray-300 dark:ring-slate-700 hover:bg-gray-50 focus:z-20 focus:outline-offset-0"
+                                            class="px-4 py-2  text-[11px] ring-1 ring-inset ring-gray-300  hover:bg-gray-50 focus:z-20 focus:outline-offset-0"
                                             :class="[currentPage === allPages ? 'text-gray-400' : 'text-gray-700']"
                                             tabindex="-1" @click.prevent="nextEntries()"
                                             :disabled="currentPage === allPages">Next</button>
                                     </li>
                                     <li
-                                        class="page-item relative inline-flex items-center rounded-r-md px-2 py-2 ring-1 ring-inset ring-gray-300 dark:ring-slate-700 hover:bg-gray-50 focus:z-20 focus:outline-offset-0">
+                                        class="page-item relative inline-flex items-center rounded-r-md px-2 py-2 ring-1 ring-inset ring-gray-300  hover:bg-gray-50 focus:z-20 focus:outline-offset-0">
                                         <button :class="[currentPage === allPages ? 'text-gray-400' : 'text-gray-700']"
                                             tabindex="-1" @click.prevent="lastEntries()"
                                             :disabled="currentPage === allPages">Last</button>
@@ -324,13 +324,13 @@ export default {
         checkAll(evt) {
             if (evt.target.checked) {
                 jQuery('.checkTrigger').prop("checked", true);
-                jQuery('.checkTrigger').closest('tr').addClass('highlight-color dark:bg-darkmode-500');
+                jQuery('.checkTrigger').closest('tr').addClass('highlight-color ');
                 this.formattedData.forEach(item => {
                     // item.checked = true;
                     this.checkedItems.push(item);
                 });
             } else {
-                jQuery('.checkTrigger').closest('tr').removeClass('highlight-color dark:bg-darkmode-500');
+                jQuery('.checkTrigger').closest('tr').removeClass('highlight-color ');
                 jQuery('.checkTrigger').prop("checked", false);
                 this.formattedData.forEach(item => {
                     item.checked = false;
@@ -347,12 +347,12 @@ export default {
             // const nextHighlightedTd = parentRow.querySelector("");
             if (isChecked) {
                 parentRow.classList.add("highlight-color");
-                parentRow.classList.add("dark:bg-darkmode-500");
+              
                 const itemData = this.formattedData.filter((item) => item.id == value);
                 this.checkedItems.push(...itemData)
             } else {
                 parentRow.classList.remove("highlight-color");
-                parentRow.classList.remove("dark:bg-darkmode-500");
+             
                 jQuery('.parentCheckbox').prop('checked', false);
                 const itemData = this.formattedData.filter((item) => item.id == value);
                 const index = this.checkedItems.indexOf(...itemData);

@@ -3,7 +3,7 @@
         <div class="bg-[#ffffffee] w-[650px] p-[50px] border border-gray-300 shadow-sm rounded-md" data-aos="fade-left" data-aos-delay="200" data-aos-duration="1500">    
           <div class="relative">
             <h2 class="h-24 text-center font-bold text-3xl text-emsBlue" >ADMIN LOGIN</h2>
-            <form @submit.prevent="handleLogin" @keydown="form.onKeydown($event)" class="space-y-6">
+            <form @submit.prevent="handleLogin" @keydown="form.onKeydown($event)" class="space-y-6 relative">
               <div>
                 <label for="email" class="block text-sm font-medium leading-6 text-gray-900">Email Address</label>
                 <div class="mt-2">
@@ -32,6 +32,7 @@
                   <a href="#" class="font-semibold text-emsBlue hover:text-blue-500">Forgot password?</a>
                 </div>
               </div>
+              <small class="text-gray-400 absolute bottom-[-25px] left-0">Device ID: {{ form.uuid }}</small>
             </form>
            
           </div>
@@ -44,7 +45,7 @@
   </template>
 
   <script setup>
-  import { reactive, ref } from 'vue';
+  import { reactive, ref, onMounted } from 'vue';
   import Form from 'vform'
 
 //   import {siteSettings} from '@/store/utils';
@@ -57,9 +58,11 @@
     const form = reactive(new Form({
         email: '',
         password: '',
+        uuid: '',
     }));
 
     const processing = ref(false)
+
 
 
     function handleLogin(){
@@ -82,6 +85,13 @@
       });
                  
     }
+
+    onMounted(async () => {
+    if (window.electronAPI && typeof window.electronAPI.getUUID === 'function') {
+      form.uuid = await window.electronAPI.getUUID();
+  
+    }
+  });
  
    
 

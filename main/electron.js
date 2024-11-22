@@ -1,8 +1,7 @@
-import { app, BrowserWindow, globalShortcut  } from 'electron';
+import { app, BrowserWindow, ipcMain } from 'electron';
+import si from 'systeminformation';
 import path from 'path';
-import { fileURLToPath, pathToFileURL } from 'url';
-// const { readFile, writeFile } = require('fs').promises;
-
+import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -15,47 +14,28 @@ function createWindow() {
     backgroundColor: '#ffffff',
     icon: path.join(__dirname, '../public/logo/ems-small-logo.png'),
     webPreferences: {
-     // preload: path.join(process.cwd(), 'main/preload.js'),
-     contextIsolation: false, // You might want to set this to true in production
-     nodeIntegration: false,
-     enableRemoteModule: true,
-     allowRunningInsecureContent: true,
+      contextIsolation: true,
+      nodeIntegration: false,
+      preload: path.join(__dirname, 'preload.js'), // Add this
     },
   });
-  mainWindow.setBackgroundColor('#56cc5b10');
-    globalShortcut.register('f5', function() {
-        console.log('f5 is pressed')
-        mainWindow.reload()
-    });
 
   if (process.env.NODE_ENV === 'development') {
-    mainWindow.loadURL('http://localhost:5173'); 
+    mainWindow.loadURL('http://localhost:5173');
   } else {
-    mainWindow.loadFile(path.join(__dirname, '../dist/index.html')); // Production build
+    mainWindow.loadFile(path.join(__dirname, '../dist/index.html'));
   }
 }
 
-app.whenReady().then(createWindow);
+app.whenReady().then(() => {
+  createWindow();
 
-// ipcMain.handle('save-face-data', async (event, data) => {
-//   try {
-//     const dataPath = path.join(__dirname, 'faceData.json');
-//     let existingData = [];
-
-//     try {
-//       existingData = JSON.parse(await readFile(dataPath, 'utf8'));
-//     } catch {
-//       console.log("Creating a new face data file.");
-//     }
-
-//     existingData.push(data);
-//     await writeFile(dataPath, JSON.stringify(existingData, null, 2));
-//     return { success: true, message: 'Face data saved!' };
-//   } catch (error) {
-//     console.error('Error saving face data:', error);
-//     return { success: false, message: 'Failed to save face data.' };
-//   }
-// });
+  // Fetch and send UUID
+  ipcMain.handle('get-uuid', async () => {
+    const { uuid } = await si.system();
+    return uuid;
+  });
+});
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {

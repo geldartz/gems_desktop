@@ -7,10 +7,14 @@ export const userAuthStore = defineStore('userAuth', {
     state: () => ({
         authenticated: false,
         user: {},
+        apiKey:'',
+        locationID:'',
     }),
 
     getters: {
         getUser: (state) => state.user,
+        getAPIKey: (state) => state.apiKey,
+        getLocation: (state) => state.locationID,
         getAuthentition: (state) => state.authenticated
     },
 

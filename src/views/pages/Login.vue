@@ -22,7 +22,7 @@
                 </div>
               </div>
               <p class="my-2 text-gray-500 text-sm">By logging-in you agree to our <RouterLink class="text-emsBlue" to="/privacy-policy">Privacy Policy</RouterLink>  and <RouterLink class="text-emsBlue" to="/terms-and-condition">Terms of Use</RouterLink></p>
-              <SolidButton :isLoading="form.busy" label="Login" :icon="LockClosedIcon"></SolidButton>
+              <SolidButton  :isLoading="form.busy && isDeviceIDLoaded" label="Login" :icon="LockClosedIcon"></SolidButton>
               <div class="flex items-center justify-between">
                 <div class="flex items-center">
                   <input id="remember-me" name="remember-me" type="checkbox" class="h-4 w-4 rounded border-gray-300 text-emsBlue focus:ring-blue-600" />
@@ -32,7 +32,7 @@
                   <a href="#" class="font-semibold text-emsBlue hover:text-blue-500">Forgot password?</a>
                 </div>
               </div>
-              <small class="text-gray-400 absolute bottom-[-25px] left-0">Device ID: {{ form.uuid }}</small>
+              <small class="text-gray-400 absolute bottom-[-25px] left-0">Device ID: {{ form.device_id }}</small>
             </form>
            
           </div>
@@ -58,20 +58,21 @@
     const form = reactive(new Form({
         email: '',
         password: '',
-        uuid: '',
+        device_id: '',
     }));
 
     const processing = ref(false)
-
-
+    const isDeviceIDLoaded = ref(true)
 
     function handleLogin(){
       axios.get(import.meta.env.VITE_API_URL+'/sanctum/csrf-cookie').then(response => {
-        form.post(import.meta.env.VITE_API_URL+"/login").then((data) => {
+        form.post(import.meta.env.VITE_API_URL+"/face-login").then((data) => {
           console.log(data)
             if(data.data.success){
               userAuthStore().authenticated = true
               userAuthStore().user = data.data.data
+              userAuthStore().apiKey = data.data.data.api_key
+              userAuthStore().locationID = data.data.data.location_id
               userAuthStore().redirect();
             }else{
               errorMessage("Oops!", "These credentials do not match our records.", "top-right");
@@ -88,8 +89,11 @@
 
     onMounted(async () => {
     if (window.electronAPI && typeof window.electronAPI.getUUID === 'function') {
-      form.uuid = await window.electronAPI.getUUID();
-  
+      form.device_id = await window.electronAPI.getUUID();
+      if(form.device_id ){
+        isDeviceIDLoaded.value = false
+      }
+     
     }
   });
  

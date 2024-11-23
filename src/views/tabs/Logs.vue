@@ -1,6 +1,7 @@
 <template>
       <div class="block mx-auto h-screen">
-        <CustomTable  :url="'/'" :headers="detailedTableHeaders"></CustomTable>
+        <h1>Logs </h1>
+        <!-- <CustomTable  :url="'/'" :headers="detailedTableHeaders"></CustomTable> -->
       </div>
   </template>
   

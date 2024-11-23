@@ -1,16 +1,20 @@
 <template>
     <div class="w-full p-5 mx-auto">
       <div class="relative flex border-b border-gray-300">
-        <button v-for="(tab, index) in tabs" :key="index" @click="activeTab = index" class="relative flex-1 py-2 text-center text-gray-600 cursor-pointer transition-colors hover:text-blue-500" :class="{ 'text-blue-600 font-semibold': activeTab === index }" > {{ tab.name }} </button>
+        <button v-for="(tab, index) in tabs" :key="index" @click="setTab(index)" class="relative flex-1 py-2 text-center text-gray-600 cursor-pointer transition-colors hover:text-blue-500" :class="{ 'text-blue-600 font-semibold': activeTab === index }" > {{ tab.name }} </button>
         <span
           class="absolute bottom-0 left-0 h-0.5 bg-blue-500 transition-all duration-300"
           :style="{ width: `${100 / tabs.length}%`, transform: `translateX(${activeTab * 100}%)` }"
         ></span>
       </div>
       <div class="p-5">
-        <transition name="fade-slide" mode="out-in">
-        <component :is="tabs[activeTab].component" :key="activeTab" />
-        </transition>
+        <!-- <transition name="fade-slide" mode="out-in"> -->
+          <RegisterFace v-if="activeTab == 0"></RegisterFace>
+          <ManualPage v-else-if="activeTab == 1"></ManualPage>
+          <Logs v-else-if="activeTab == 2"></Logs>
+          <Settings v-else></Settings>
+        <!-- <component :is="tabs[activeTab].component" :key="activeTab" /> -->
+        <!-- </transition> -->
       </div>
     </div>
   </template>
@@ -31,6 +35,12 @@
     { name: 'Logs', component: Logs },
     { name: 'Settings', component: Settings },
     ]);
+
+  function setTab(index){
+    console.log(index)
+    activeTab.value = index
+  }
+
   </script>
   
   <style scoped>

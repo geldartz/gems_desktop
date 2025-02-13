@@ -1,6 +1,6 @@
 # gems_desktop
 
-This template should help get you started developing with Vue 3 in Vite.
+Face recognation system using Electron JS and VueJs for the frontend. This is connected to GEMS Attendance Monitoring System.(https://gems.globalland.com.ph/)
 
 ## Recommended IDE Setup
 
